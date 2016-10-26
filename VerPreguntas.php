@@ -40,7 +40,7 @@
 
 	//conexion remota------->cambiarla!!!!!!!!!!
 
-	//$mysqli = mysqli_connect("mysql.hostinger.es"," 	u204349316_oscar","gabriel3", "u204349316_preg" ) or die(mysql_error());
+	//$mysqli = mysqli_connect("mysql.hostinger.es","u102281824_migel","miguel3", "u102281824_sw" ) or die(mysql_error());
 	
 	//conexion local
 	

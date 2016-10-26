@@ -27,22 +27,6 @@
 			}
 			</style>
 			
-			<script>
-			
-			function comprobar(){
-				
-				if( $_POST['pregunta'] == "" ){
-					alert("INTRODUCE UNA PREGUNTA");
-				
-				}if( $_POST['respuesta'] == "" ){
-					alert("INTRODUCE UNA RESPUESTA A TU PREGUNTA");
-					
-				}if( $_POST['dificultad'] == 0 ){
-					alert("SELECCIONA UN GRADO DE DIFICULTAD");
-				}
-			}
-			
-			</script>
   </head>
   
   
@@ -55,9 +39,6 @@
 	
 	if( !empty($_SESSION['user']) ){ //en caso de que tengamos algo ahi guardado todo va bien
 	
-			$pregunta = $_POST['pregunta'];
-			$respuesta = $_POST['respuesta'];
-			$dificultad = $_POST['dificultad'];
 	}
   
 	?>
@@ -67,6 +48,14 @@
 	<header class='main' id='h1'>
 		<span class="right"><a href="formulario.html">Registrarse</a></span>	
       		<span class="right"><a href="">Logout</a></span>
+		<br></br>
+		<p>
+		<?php
+		echo "Has iniciado sesion como: " ;
+		echo $_SESSION['user'];
+		?>
+		</p>
+		<br></br>
 		<h2>Quiz: el juego de las preguntas</h2>
     </header>
 	<nav class='main' id='n1' role='navigation'>
@@ -89,6 +78,10 @@
 		<td></td><td></td>
 		<tr>
 		<td>Respuesta: </td> <td> <input type="text" id = "respuesta" name="respuesta" required></td>
+		</tr>
+		<td></td><td></td>
+		<tr>
+		<td>Tema: </td> <td> <input type="text" id = "tema" name="tema" required></td>
 		</tr>
 		<td></td><td></td>
 		<tr>
@@ -115,7 +108,6 @@
 	<footer class='main' id='f1'>
 		<p><a href="http://es.wikipedia.org/wiki/Quiz" target="_blank">Que es un Quiz?</a></p>
 		<a href='https://github.com'>Link GITHUB</a>
-		<br>You are logged as $_SESSION['user']</br> 
 	</footer>
 </div>
 </body>
@@ -139,9 +131,9 @@
 	
 	//En hostinger
 	/*$host = "mysql.hostinger.es";
-	$user = "u204349316_oscar";
-	$password = "gabriel3";
-	$dbname = "u204349316_preg";
+	$user = "u102281824_migel";
+	$password = "miguel3";
+	$dbname = "u102281824_sw"; 	
 	*/
 	
 	$mysqli = mysqli_connect($host, $user, $password, $dbname);
@@ -158,46 +150,63 @@
 	
 	if(empty($_POST['pregunta'])){
 		
-		die( 'Escribe la pregunta que deseas agregar' );
+		die( '' );
 		
 	}if(empty($_POST['respuesta'])){
 			
-		die('Introduce una respuesta a tu pregunta');
+		die('');
 	
 	}
 			
-	if(empty($_POST['dificultad']) || $_POST['dificultad'] ==0 ){
+	if(empty($_POST['dificultad']) || $_POST['dificultad'] == 0 ){
+		
+		echo "<center>";
 			
 		die('Selecciona un grado de dificultad para tu pregunta');
 		
+		echo "</center>";
+		
 	}
 	
-	//ahora, si no hay otra pregunta igual, ingresaremos la pregunta en la bd 
-
-	//si no hay variables globales como se el numero de pregunta que corresponde?<--omitirlo!
-	
-			if( empty($email)){
+			if( empty($_SESSION['user'])){
 				
 				die("Por favor inicie sesion para poder insertar preguntas");
-	
 				
 			}
+			
+			$pregunta = $_POST['pregunta'];
+			$respuesta = $_POST['respuesta'];
+			$dificultad = $_POST['dificultad'];
+			$tema=$_POST['tema'];
 	
-			$sql = "INSERT INTO preguntas(Email, Pregunta, Respuesta, Dificultad) VALUES('$email','$pregunta','$respuesta',$dificultad)";
+			$sql = "INSERT INTO preguntas(Email, Pregunta, Respuesta, Dificultad, Tema) VALUES('$email','$pregunta','$respuesta','$dificultad','$tema')";
 			
 			$res = mysqli_query($mysqli ,$sql);
-			
-			if( mysqli_num_rows($res) < 1 ){
-		
-				die('Error al escribir en la Base de Datos: ' . mysql_error());
-							
-			}
-			
+	
+			echo "<center>";
 			echo "¡Pregunta agregada con exito!";
-			echo "";
-			echo "<p> <a href='VerPreguntas.php'> VER TODAS LAS PREGUNTAS </a>";
+			echo "<br><br>";
+			echo "<p> <a href='VerPreguntas.php'> VER PREGUNTAS </a>";
+			echo "</center>";
 			
 			
+		//añadir a preguntas xml
+		
+		$xml = simplexml_load_file('preguntas.xml');
+		$pregunta1 = $xml->addChild('assessmentItem');
+		$pregunta1->addAttribute('complexity',$dificultad); 
+		$pregunta1->addAttribute('subject',$tema); 
+		$itemBody = $pregunta1->addChild('itemBody');
+		$itemBody->addChild('p',$pregunta); 
+		$correctResponse = $pregunta1->addChild('correctResponse');
+		$correctResponse->addChild('value',$respuesta); 
+		$resultado = $xml->asXML('preguntas.xml');
+		if($resultado == true){
+		echo '<p>La pregunta se ha insertado correctamente en preguntas.xml</p>';
+		echo '<br/><a href="verPreguntasXML.php"> VER PREGUNTAS DE preguntas.xml </a>';
+		}
+		else
+		echo '</p> Error al insertar pregunta en preguntas.xml</p>';
 	
 	
 		
